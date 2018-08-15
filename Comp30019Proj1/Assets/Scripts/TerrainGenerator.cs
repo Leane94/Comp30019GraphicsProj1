@@ -16,6 +16,8 @@ public class TerrainGenerator : MonoBehaviour {
     // Range for the random number to be added in each iteration
     public float HeightDecreaseRate = 0.5f;
 
+    public Shader shader;
+
     // Array of all vertices
     private Vector3[] Vertices;
 
@@ -31,7 +33,10 @@ public class TerrainGenerator : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
         CreateTerrain();
-	}
+        ColourTerrain();
+        this.gameObject.GetComponent<MeshRenderer>().material.shader = shader;
+        
+    }
 	
 	// Update is called once per frame
 	void Update () {
@@ -106,6 +111,7 @@ public class TerrainGenerator : MonoBehaviour {
         int Iteration = (int)Mathf.Log(NumDivisions, 2);
         int SquareCounter = 1;
         int SquareSize = NumDivisions;
+        float HeightOffset = MaxHeight;
 
         for (int i = 0; i < Iteration; i++)
         {
@@ -115,19 +121,19 @@ public class TerrainGenerator : MonoBehaviour {
                 int Col = 0;
                 for (int k = 0; k < SquareCounter; k++)
                 {
-                    DSCalculator(Row, Col, SquareSize);
+                    DSCalculator(Row, Col, SquareSize, HeightOffset);
                     Col += SquareSize;
                 }
                 Row += SquareSize;
             }
             SquareCounter *= 2;
             SquareSize /= 2;
-            MaxHeight *= HeightDecreaseRate;
+            HeightOffset *= HeightDecreaseRate;
         }
     }
 
     // Diamond Square calculation
-    private void DSCalculator(int Row, int Col, int Size)
+    private void DSCalculator(int Row, int Col, int Size, float Offset)
     {
         int HalfSize = (int)(0.5f * Size);
         int TopLeft = Row * (NumDivisions + 1) + Col;
@@ -136,7 +142,7 @@ public class TerrainGenerator : MonoBehaviour {
         // Diamond step
         int Mid = (Row + HalfSize) * (NumDivisions + 1) + (Col + HalfSize);
         Vertices[Mid].y = (Vertices[TopLeft].y + Vertices[BottomLeft].y + Vertices[TopLeft + Size].y + Vertices[BottomLeft + Size].y) * 0.25f
-            + Random.Range(-MaxHeight, MaxHeight);
+            + Random.Range(-Offset, Offset);
 
         // Square step
         int Top = TopLeft + HalfSize;
@@ -148,50 +154,77 @@ public class TerrainGenerator : MonoBehaviour {
         if (Top <= NumDivisions)
         {
             Vertices[Top].y = (Vertices[TopLeft].y + Vertices[Mid].y + Vertices[TopLeft + Size].y) / 3 
-                + Random.Range(-MaxHeight, MaxHeight);
+                + Random.Range(-Offset, Offset);
         }
         else
         {
             int Temp = (Row - HalfSize) * (NumDivisions + 1) + Col + HalfSize;
             Vertices[Top].y = (Vertices[TopLeft].y + Vertices[Mid].y + Vertices[TopLeft + Size].y + Vertices[Temp].y) * 0.25f
-                + Random.Range(-MaxHeight, MaxHeight);
+                + Random.Range(-Offset, Offset);
         }
 
         // If vertex on left edge of terrain
         if (Left % (NumDivisions+1) == 0)
         {
             Vertices[Left].y = (Vertices[TopLeft].y + Vertices[Mid].y + Vertices[BottomLeft].y) / 3 
-                + Random.Range(-MaxHeight, MaxHeight);
+                + Random.Range(-Offset, Offset);
         }
         else
         {
             Vertices[Left].y = (Vertices[TopLeft].y + Vertices[Mid].y + Vertices[BottomLeft].y + Vertices[Mid-Size].y) * 0.25f
-                + Random.Range(-MaxHeight, MaxHeight);
+                + Random.Range(-Offset, Offset);
         }
 
         // If vertex on bottom edge of terrain
         if (Bottom >= (NumVertices - 1 - NumDivisions)){
             Vertices[Bottom].y = (Vertices[BottomLeft].y + Vertices[Mid].y + Vertices[BottomLeft + Size].y) / 3 
-                + Random.Range(-MaxHeight, MaxHeight);
+                + Random.Range(-Offset, Offset);
         }
         else
         {
             int Temp = (Row + 3 * HalfSize) + (NumDivisions + 1) + Col + HalfSize;
             Vertices[Bottom].y = (Vertices[BottomLeft].y + Vertices[Mid].y + Vertices[BottomLeft + Size].y + Vertices[Temp].y) * 0.25f
-                + Random.Range(-MaxHeight, MaxHeight);
+                + Random.Range(-Offset, Offset);
         }
 
         // If vertex on right edge of terrain
         if ((Right+1) % (NumDivisions + 1) == 0)
         {
             Vertices[Right].y = (Vertices[TopLeft + Size].y + Vertices[Mid].y + Vertices[BottomLeft + Size].y) / 3 
-                + Random.Range(-MaxHeight, MaxHeight);
+                + Random.Range(-Offset, Offset);
         }
         else
         {
             Vertices[Right].y = (Vertices[TopLeft + Size].y + Vertices[Mid].y + Vertices[BottomLeft + Size].y + Vertices[Mid+Size].y) * 0.25f
-                + Random.Range(-MaxHeight, MaxHeight);
+                + Random.Range(-Offset, Offset);
         }
+    }
+
+    // Set colour of terrain based on height of vertex
+    private void ColourTerrain()
+    {
+        Mesh TerrainMesh = GetComponent<MeshFilter>().mesh;
+        Color[] ColourArray = new Color[Vertices.Length];
+        for (int i = 0; i < Vertices.Length; i++)
+        {
+            if (Vertices[i].y < 0.1f)
+            {
+                ColourArray[i] = Color.yellow;
+            }
+            else if (Vertices[i].y > MaxHeight * 0.9f)
+            {
+                ColourArray[i] = Color.white;
+            }
+            else
+            {
+                ColourArray[i] = Color.green;
+            }
+        }
+        TerrainMesh.colors = ColourArray;
+
+        TerrainMesh.RecalculateBounds();
+        TerrainMesh.RecalculateNormals();
+
     }
 
 }

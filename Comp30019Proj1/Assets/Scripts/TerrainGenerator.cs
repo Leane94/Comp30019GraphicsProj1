@@ -2,228 +2,253 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TerrainGenerator : MonoBehaviour {
+public class TerrainGenerator : MonoBehaviour
+{
 
     // Number of divisions per line (e.g. 5 vertices/line => 4*4 divisions)
-    public int NumDivisions = 128;
+    public int numDivisions = 128;
 
     // Width/Length of the terrain in the world (terrain is a square)
-    public float TerrainWidth = 30;
+    public float terrainWidth = 30;
 
     // Max height of the terrain
-    public float MaxHeight = 5;
+    public float maxHeight = 5;
 
     // Range for the random number to be added in each iteration
-    public float HeightDecreaseRate = 0.5f;
-
-    public Shader shader;
-
-    // Array of all vertices
-    private Vector3[] Vertices;
+    public float heightDecreaseRate = 0.5f;
 
     // Total number of vertices
-    private int NumVertices;
+    private int numVertices;
 
-    // Array of UV vectors
-    private Vector2[] UVs;
-
-    // Array of all triangles on mesh
-    private int[] Triangles;
-
-	// Use this for initialization
-	void Start () {
+    // Use this for initialization
+    void Start()
+    {
+        numVertices = (numDivisions + 1) * (numDivisions + 1);
+        CreateWater();
         CreateTerrain();
         ColourTerrain();
-        this.gameObject.GetComponent<MeshRenderer>().material.shader = shader;
-        
+
     }
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
 
-    private void CreateTerrain()
+    // Update is called once per frame
+    void Update()
     {
-        // Initialisation
-        NumVertices = (NumDivisions + 1) * (NumDivisions + 1);
-        Vertices = new Vector3[NumVertices];
-        UVs = new Vector2[NumVertices];
-        Triangles = new int[NumDivisions * NumDivisions * 6];
 
-        float HalfWidth = TerrainWidth * 0.5f;
-        float DivisionWidth = TerrainWidth / NumDivisions;
+    }
+
+    // Create a flat mesh 
+    public Mesh CreateMesh()
+    {
+        // Initialisation    
+
+        // Array of all vertices
+        Vector3[] vertices = new Vector3[numVertices];
+        // Array of UV vectors
+        Vector2[] uvs = new Vector2[numVertices];
+        // Array of all triangles on mesh
+        int[] triangles = new int[numDivisions * numDivisions * 6];
+
+        float HalfWidth = terrainWidth * 0.5f;
+        float DivisionWidth = terrainWidth / numDivisions;
 
         // Create a new mesh
-        Mesh TerrainMesh = new Mesh();
-        GetComponent<MeshFilter>().mesh = TerrainMesh;
+        Mesh flatMesh = new Mesh();
 
         int TriangleOffset = 0;
 
-        // Set up array of Vertices, UVs and Triangles
-        for (int i = 0; i <= NumDivisions; i++)
+        // Set up array of vertices, uvs and triangles
+        for (int i = 0; i <= numDivisions; i++)
         {
-            for (int j = 0; j <= NumDivisions; j++)
+            for (int j = 0; j <= numDivisions; j++)
             {
                 // Make Terrain's center to be (0,0)
-                Vertices[i * (NumDivisions + 1) + j] = new Vector3((-HalfWidth + j * DivisionWidth), 0.0f, (HalfWidth - i * DivisionWidth));
-                UVs[i * (NumDivisions + 1) + j] = new Vector2((float)i / NumDivisions, (float)j / NumDivisions);
+                vertices[i * (numDivisions + 1) + j] = new Vector3((-HalfWidth + j * DivisionWidth), 0.0f, (HalfWidth - i * DivisionWidth));
+                uvs[i * (numDivisions + 1) + j] = new Vector2((float)i / numDivisions, (float)j / numDivisions);
 
-                if (i < NumDivisions && j < NumDivisions)
+                if (i < numDivisions && j < numDivisions)
                 {
-                    int TopLeft = i * (NumDivisions + 1) + j;
-                    int BottomLeft = (i + 1) * (NumDivisions + 1) + j;
+                    int topLeft = i * (numDivisions + 1) + j;
+                    int bottomLeft = (i + 1) * (numDivisions + 1) + j;
 
-                    // Triangles has to be clock-wise to be rendered
-                    Triangles[TriangleOffset] = TopLeft;
-                    Triangles[TriangleOffset + 1] = TopLeft + 1;
-                    Triangles[TriangleOffset + 2] = BottomLeft;
+                    // triangles has to be clock-wise to be rendered
+                    triangles[TriangleOffset] = topLeft;
+                    triangles[TriangleOffset + 1] = topLeft + 1;
+                    triangles[TriangleOffset + 2] = bottomLeft;
 
-                    Triangles[TriangleOffset + 3] = TopLeft + 1;
-                    Triangles[TriangleOffset + 4] = BottomLeft + 1;
-                    Triangles[TriangleOffset + 5] = BottomLeft;
+                    triangles[TriangleOffset + 3] = topLeft + 1;
+                    triangles[TriangleOffset + 4] = bottomLeft + 1;
+                    triangles[TriangleOffset + 5] = bottomLeft;
 
                     TriangleOffset += 6;
                 }
             }
         }
 
-        DiamondSquare(TerrainMesh);
+        flatMesh.vertices = vertices;
+        flatMesh.uv = uvs;
+        flatMesh.triangles = triangles;
 
-        // Update mesh
-        TerrainMesh.vertices = Vertices;
-        TerrainMesh.uv = UVs;
-        TerrainMesh.triangles = Triangles;
+        flatMesh.RecalculateBounds();
+        flatMesh.RecalculateNormals();
 
-        TerrainMesh.RecalculateBounds();
-        TerrainMesh.RecalculateNormals();
+        return flatMesh;
+    }
+
+    private void CreateWater()
+    {
+        Mesh waterMesh = CreateMesh();
+        this.transform.Find("Water").gameObject.GetComponent<MeshFilter>().mesh = waterMesh;
+        this.transform.Find("Water").gameObject.GetComponent<MeshCollider>().sharedMesh = waterMesh;
+        Debug.Log("Water created");
+    }
+
+    private void CreateTerrain()
+    {        
+
+        // Create a new mesh for terrain
+        Mesh terrainMesh = CreateMesh();
+        GetComponent<MeshFilter>().mesh = terrainMesh;
+
+        DiamondSquare(terrainMesh);
+
+        GetComponent<MeshCollider>().sharedMesh = terrainMesh;
     }
 
     // Diamond-Square algorithms
-    private void DiamondSquare(Mesh TerrainMesh)
+    private void DiamondSquare(Mesh terrainMesh)
     {
         // Initialize corner of the terrain
-        Vertices[0].y = Random.Range(-MaxHeight, MaxHeight);
-        Vertices[NumDivisions].y = Random.Range(-MaxHeight, MaxHeight);
-        Vertices[Vertices.Length - 1 - NumDivisions].y = Random.Range(-MaxHeight, MaxHeight);
-        Vertices[Vertices.Length - 1].y = Random.Range(-MaxHeight, MaxHeight);
+        Vector3[] vertices = terrainMesh.vertices;
+        vertices[0].y = Random.Range(-maxHeight, maxHeight);
+        vertices[numDivisions].y = Random.Range(-maxHeight, maxHeight);
+        vertices[vertices.Length - 1 - numDivisions].y = Random.Range(-maxHeight, maxHeight);
+        vertices[vertices.Length - 1].y = Random.Range(-maxHeight, maxHeight);
 
-        int Iteration = (int)Mathf.Log(NumDivisions, 2);
-        int SquareCounter = 1;
-        int SquareSize = NumDivisions;
-        float HeightOffset = MaxHeight;
+        int iteration = (int)Mathf.Log(numDivisions, 2);
+        int squareCounter = 1;
+        int squareSize = numDivisions;
+        float heightOffset = maxHeight;
 
-        for (int i = 0; i < Iteration; i++)
+        for (int i = 0; i < iteration; i++)
         {
-            int Row = 0;
-            for (int j = 0; j < SquareCounter; j++)
+            int row = 0;
+            for (int j = 0; j < squareCounter; j++)
             {
-                int Col = 0;
-                for (int k = 0; k < SquareCounter; k++)
+                int col = 0;
+                for (int k = 0; k < squareCounter; k++)
                 {
-                    DSCalculator(Row, Col, SquareSize, HeightOffset);
-                    Col += SquareSize;
+                    DSCalculator(row, col, squareSize, heightOffset, vertices);
+                    col += squareSize;
                 }
-                Row += SquareSize;
+                row += squareSize;
             }
-            SquareCounter *= 2;
-            SquareSize /= 2;
-            HeightOffset *= HeightDecreaseRate;
+            squareCounter *= 2;
+            squareSize /= 2;
+            heightOffset *= heightDecreaseRate;
+
         }
+
+        // update mesh
+        terrainMesh.vertices = vertices;
+
+        terrainMesh.RecalculateBounds();
+        terrainMesh.RecalculateNormals();
     }
 
     // Diamond Square calculation
-    private void DSCalculator(int Row, int Col, int Size, float Offset)
+    private void DSCalculator(int row, int col, int size, float offset, Vector3[] vertices)
     {
-        int HalfSize = (int)(0.5f * Size);
-        int TopLeft = Row * (NumDivisions + 1) + Col;
-        int BottomLeft = (Row + Size) * (NumDivisions + 1) + Col;
+        int halfSize = (int)(0.5f * size);
+        int topLeft = row * (numDivisions + 1) + col;
+        int bottomLeft = (row + size) * (numDivisions + 1) + col;
 
         // Diamond step
-        int Mid = (Row + HalfSize) * (NumDivisions + 1) + (Col + HalfSize);
-        Vertices[Mid].y = (Vertices[TopLeft].y + Vertices[BottomLeft].y + Vertices[TopLeft + Size].y + Vertices[BottomLeft + Size].y) * 0.25f
-            + Random.Range(-Offset, Offset);
+        int mid = (row + halfSize) * (numDivisions + 1) + (col + halfSize);
+        vertices[mid].y = (vertices[topLeft].y + vertices[bottomLeft].y + vertices[topLeft + size].y + vertices[bottomLeft + size].y) * 0.25f
+            + Random.Range(-offset, offset);
 
         // Square step
-        int Top = TopLeft + HalfSize;
-        int Left = Mid - HalfSize;
-        int Bottom = BottomLeft + HalfSize;
-        int Right = Mid + HalfSize;
+        int top = topLeft + halfSize;
+        int left = mid - halfSize;
+        int bottom = bottomLeft + halfSize;
+        int right = mid + halfSize;
 
         // If vertex on top edge of terrain
-        if (Top <= NumDivisions)
+        if (top <= numDivisions)
         {
-            Vertices[Top].y = (Vertices[TopLeft].y + Vertices[Mid].y + Vertices[TopLeft + Size].y) / 3 
-                + Random.Range(-Offset, Offset);
+            vertices[top].y = (vertices[topLeft].y + vertices[mid].y + vertices[topLeft + size].y) / 3
+                + Random.Range(-offset, offset);
         }
         else
         {
-            int Temp = (Row - HalfSize) * (NumDivisions + 1) + Col + HalfSize;
-            Vertices[Top].y = (Vertices[TopLeft].y + Vertices[Mid].y + Vertices[TopLeft + Size].y + Vertices[Temp].y) * 0.25f
-                + Random.Range(-Offset, Offset);
+            int temp = (row - halfSize) * (numDivisions + 1) + col + halfSize;
+            vertices[top].y = (vertices[topLeft].y + vertices[mid].y + vertices[topLeft + size].y + vertices[temp].y) * 0.25f
+                + Random.Range(-offset, offset);
         }
 
         // If vertex on left edge of terrain
-        if (Left % (NumDivisions+1) == 0)
+        if (left % (numDivisions + 1) == 0)
         {
-            Vertices[Left].y = (Vertices[TopLeft].y + Vertices[Mid].y + Vertices[BottomLeft].y) / 3 
-                + Random.Range(-Offset, Offset);
+            vertices[left].y = (vertices[topLeft].y + vertices[mid].y + vertices[bottomLeft].y) / 3
+                + Random.Range(-offset, offset);
         }
         else
         {
-            Vertices[Left].y = (Vertices[TopLeft].y + Vertices[Mid].y + Vertices[BottomLeft].y + Vertices[Mid-Size].y) * 0.25f
-                + Random.Range(-Offset, Offset);
+            vertices[left].y = (vertices[topLeft].y + vertices[mid].y + vertices[bottomLeft].y + vertices[mid - size].y) * 0.25f
+                + Random.Range(-offset, offset);
         }
 
         // If vertex on bottom edge of terrain
-        if (Bottom >= (NumVertices - 1 - NumDivisions)){
-            Vertices[Bottom].y = (Vertices[BottomLeft].y + Vertices[Mid].y + Vertices[BottomLeft + Size].y) / 3 
-                + Random.Range(-Offset, Offset);
+        if (bottom >= (numVertices - 1 - numDivisions))
+        {
+            vertices[bottom].y = (vertices[bottomLeft].y + vertices[mid].y + vertices[bottomLeft + size].y) / 3
+                + Random.Range(-offset, offset);
         }
         else
         {
-            int Temp = (Row + 3 * HalfSize) + (NumDivisions + 1) + Col + HalfSize;
-            Vertices[Bottom].y = (Vertices[BottomLeft].y + Vertices[Mid].y + Vertices[BottomLeft + Size].y + Vertices[Temp].y) * 0.25f
-                + Random.Range(-Offset, Offset);
+            int temp = (row + 3 * halfSize) + (numDivisions + 1) + col + halfSize;
+            vertices[bottom].y = (vertices[bottomLeft].y + vertices[mid].y + vertices[bottomLeft + size].y + vertices[temp].y) * 0.25f
+                + Random.Range(-offset, offset);
         }
 
         // If vertex on right edge of terrain
-        if ((Right+1) % (NumDivisions + 1) == 0)
+        if ((right + 1) % (numDivisions + 1) == 0)
         {
-            Vertices[Right].y = (Vertices[TopLeft + Size].y + Vertices[Mid].y + Vertices[BottomLeft + Size].y) / 3 
-                + Random.Range(-Offset, Offset);
+            vertices[right].y = (vertices[topLeft + size].y + vertices[mid].y + vertices[bottomLeft + size].y) / 3
+                + Random.Range(-offset, offset);
         }
         else
         {
-            Vertices[Right].y = (Vertices[TopLeft + Size].y + Vertices[Mid].y + Vertices[BottomLeft + Size].y + Vertices[Mid+Size].y) * 0.25f
-                + Random.Range(-Offset, Offset);
+            vertices[right].y = (vertices[topLeft + size].y + vertices[mid].y + vertices[bottomLeft + size].y + vertices[mid + size].y) * 0.25f
+                + Random.Range(-offset, offset);
         }
     }
 
     // Set colour of terrain based on height of vertex
     private void ColourTerrain()
     {
-        Mesh TerrainMesh = GetComponent<MeshFilter>().mesh;
-        Color[] ColourArray = new Color[Vertices.Length];
-        for (int i = 0; i < Vertices.Length; i++)
+        Mesh terrainMesh = GetComponent<MeshFilter>().mesh;
+        Vector3[] vertices = terrainMesh.vertices;
+        Color[] colourArray = new Color[vertices.Length];
+        for (int i = 0; i < vertices.Length; i++)
         {
-            if (Vertices[i].y < 0.1f)
+            if (vertices[i].y < 0.1f)
             {
-                ColourArray[i] = Color.yellow;
+                colourArray[i] = Color.yellow;
             }
-            else if (Vertices[i].y > MaxHeight * 0.9f)
+            else if (vertices[i].y > maxHeight * 0.9f)
             {
-                ColourArray[i] = Color.white;
+                colourArray[i] = Color.white;
             }
             else
             {
-                ColourArray[i] = Color.green;
+                colourArray[i] = Color.green;
             }
         }
-        TerrainMesh.colors = ColourArray;
+        terrainMesh.colors = colourArray;
 
-        TerrainMesh.RecalculateBounds();
-        TerrainMesh.RecalculateNormals();
+        terrainMesh.RecalculateBounds();
+        terrainMesh.RecalculateNormals();
 
     }
 

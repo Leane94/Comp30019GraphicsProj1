@@ -30,18 +30,16 @@ public class TerrainGenerator : MonoBehaviour
         CreateTerrain();
         ColourTerrain();
 
-        MeshRenderer shaderRenderer = this.gameObject.AddComponent<MeshRenderer>();
-        shaderRenderer.material.shader = this.shader;
-
+        MeshRenderer renderer = this.gameObject.GetComponent<MeshRenderer>();
+        renderer.material.shader = shader;
     }
-
     // Update is called once per frame
     void Update()
     {
-        MeshRenderer meshRenderer = this.gameObject.GetComponent<MeshRenderer>();
+        MeshRenderer renderer = this.gameObject.GetComponent<MeshRenderer>();
 
-        meshRenderer.material.SetColor("PointLightColor", this.pointLight.color);
-        meshRenderer.material.SetVector("PointLightPosition", this.pointLight.GetWorldPosition());
+        renderer.material.SetColor("PointLightColor", this.pointLight.color);
+        renderer.material.SetVector("PointLightPosition", this.pointLight.GetWorldPosition());
 
     }
 

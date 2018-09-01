@@ -7,7 +7,7 @@ Material:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_Name: SunMat
-  m_Shader: {fileID: 4800000, guid: 3ca8322272195bc408cd757fbb9d2f5b, type: 3}
+  m_Shader: {fileID: 4800000, guid: dec28d52ceb0c0e4b9648738d8bf86e3, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0

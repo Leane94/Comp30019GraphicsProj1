@@ -53,8 +53,6 @@ Shader "Unlit/PhongShader"
                 o.worldNormal = worldNormal;
                 
                 return o;
-               
-                
 				
 			}
 			
@@ -70,7 +68,7 @@ Shader "Unlit/PhongShader"
                 float Kd = 1;
                 float3 L = normalize(_PointLightPosition - v.worldVertex.xyz);
                 float LdotN = dot(L, interpNormal);
-                float dif = fAtt * _PointLightColor.rgb * Kd * v.color.rgb * saturate(LdotN);
+                float3 dif = fAtt * _PointLightColor.rgb * Kd * v.color.rgb * saturate(LdotN);
                 
                 float Ks = 1;
                 float specN = 25;

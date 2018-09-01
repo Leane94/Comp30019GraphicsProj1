@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class TerrainGenerator : MonoBehaviour
 {
+    public Shader shader;
+    public PointLight pointLight;
 
     // Number of divisions per line (e.g. 5 vertices/line => 4*4 divisions)
     public int numDivisions = 128;
@@ -28,11 +30,18 @@ public class TerrainGenerator : MonoBehaviour
         CreateTerrain();
         ColourTerrain();
 
+        MeshRenderer shaderRenderer = this.gameObject.AddComponent<MeshRenderer>();
+        shaderRenderer.material.shader = this.shader;
+
     }
 
     // Update is called once per frame
     void Update()
     {
+        MeshRenderer meshRenderer = this.gameObject.GetComponent<MeshRenderer>();
+
+        meshRenderer.material.SetColor("PointLightColor", this.pointLight.color);
+        meshRenderer.material.SetVector("PointLightPosition", this.pointLight.GetWorldPosition());
 
     }
 
@@ -99,7 +108,12 @@ public class TerrainGenerator : MonoBehaviour
         Mesh waterMesh = CreateMesh();
         this.transform.Find("Water").gameObject.GetComponent<MeshFilter>().mesh = waterMesh;
         this.transform.Find("Water").gameObject.GetComponent<MeshCollider>().sharedMesh = waterMesh;
+
+        waterMesh.RecalculateBounds();
+        waterMesh.RecalculateNormals();
         Debug.Log("Water created");
+
+       
     }
 
     private void CreateTerrain()

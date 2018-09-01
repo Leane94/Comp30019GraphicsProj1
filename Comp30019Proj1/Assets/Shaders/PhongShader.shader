@@ -1,56 +1,91 @@
-﻿Shader "Unlit/PhongShader"
+﻿// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
+// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
+Shader "Unlit/PhongShader"
 {
 	Properties
 	{
-		_MainTex ("Texture", 2D) = "white" {}
+	    _PointLightColor ("Point Light Color", Color) = (0, 0, 0)
+        _PointLightPosition ("Point Light Position", Vector) = (0.0, 0.0, 0.0)
+       
 	}
 	SubShader
 	{
-		Tags { "RenderType"="Opaque" }
-		LOD 100
 
 		Pass
 		{
 			CGPROGRAM
 			#pragma vertex vert
 			#pragma fragment frag
-			// make fog work
-			#pragma multi_compile_fog
 			
 			#include "UnityCG.cginc"
+            
+            uniform float3 _PointLightColor;
+            uniform float3 _PointLightPosition;
 
-			struct appdata
+			struct vertIn
 			{
 				float4 vertex : POSITION;
-				float2 uv : TEXCOORD0;
+				float4 normal : NORMAL;
+                float4 color : COLOR;
 			};
 
-			struct v2f
+			struct vertOut
 			{
-				float2 uv : TEXCOORD0;
-				UNITY_FOG_COORDS(1)
 				float4 vertex : SV_POSITION;
+                float4 color : COLOR;
+                float4 worldVertex : TEXCOORD0;
+                float3 worldNormal : TEXCOORD1;
 			};
-
-			sampler2D _MainTex;
-			float4 _MainTex_ST;
 			
-			v2f vert (appdata v)
+			vertOut vert (vertIn v)
 			{
-				v2f o;
-				o.vertex = UnityObjectToClipPos(v.vertex);
-				o.uv = TRANSFORM_TEX(v.uv, _MainTex);
-				UNITY_TRANSFER_FOG(o,o.vertex);
-				return o;
+				vertOut o;
+				float4 worldVertex = mul(unity_ObjectToWorld, v.vertex);
+				float3 worldNormal = normalize(mul(transpose((float3x3)unity_WorldToObject), v.normal.xyz));
+                
+                
+                o.vertex = UnityObjectToClipPos(v.vertex);
+                o.color = v.color;
+                
+                o.worldVertex = worldVertex;
+                o.worldNormal = worldNormal;
+                
+                return o;
+               
+                
+				
 			}
 			
-			fixed4 frag (v2f i) : SV_Target
+			fixed4 frag (vertOut v) : SV_Target
 			{
-				// sample the texture
-				fixed4 col = tex2D(_MainTex, i.uv);
-				// apply fog
-				UNITY_APPLY_FOG(i.fogCoord, col);
-				return col;
+                
+                float3 interpNormal = normalize(v.worldNormal);
+                
+                float Ka = 1;
+                float3 amb = v.color.rgb * UNITY_LIGHTMODEL_AMBIENT.rgb * Ka;
+                
+                float fAtt = 1;
+                float Kd = 1;
+                float3 L = normalize(_PointLightPosition - v.worldVertex.xyz);
+                float LdotN = dot(L, interpNormal);
+                float dif = fAtt * _PointLightColor.rgb * Kd * v.color.rgb * saturate(LdotN);
+                
+                float Ks = 1;
+                float specN = 25;
+                
+                float3 V = normalize(_WorldSpaceCameraPos - v.worldVertex.xyz);
+                
+                
+                float3 H = normalize(V + L);
+                float3 spe = fAtt * _PointLightColor.rgb * Ks * pow(saturate(dot(interpNormal, H)), specN);
+                
+                float4 returnColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
+                returnColor.rgb = amb.rgb + dif.rgb + spe.rgb;
+                returnColor.a = v.color.a;
+                
+			    return returnColor;
 			}
 			ENDCG
 		}

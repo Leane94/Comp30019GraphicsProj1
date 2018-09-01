@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class TerrainGenerator : MonoBehaviour
 {
-    public Shader shader;
     public PointLight pointLight;
 
     // Number of divisions per line (e.g. 5 vertices/line => 4*4 divisions)
@@ -29,9 +28,6 @@ public class TerrainGenerator : MonoBehaviour
         CreateWater();
         CreateTerrain();
         ColourTerrain();
-
-        MeshRenderer renderer = this.gameObject.GetComponent<MeshRenderer>();
-        renderer.material.shader = shader;
     }
     // Update is called once per frame
     void Update()

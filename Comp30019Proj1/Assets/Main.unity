@@ -143,7 +143,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f582f0dcfc3e196448c531266b9af633, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  shader: {fileID: 4800000, guid: 42b5131b98bad0840a77d0ef80da7cb7, type: 3}
   pointLight: {fileID: 559041760}
   numDivisions: 128
   terrainWidth: 30

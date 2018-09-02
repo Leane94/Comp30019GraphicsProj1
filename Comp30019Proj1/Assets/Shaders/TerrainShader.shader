@@ -45,7 +45,8 @@ Shader "Unlit/TerrainShader"
 				float3 worldNormal = normalize(mul(transpose((float3x3)unity_WorldToObject), v.normal.xyz));
 
 
-				o.vertex = UnityObjectToClipPos(v.vertex);
+				//o.vertex = UnityObjectToClipPos(v.vertex);
+				o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
 				o.color = v.color;
 
 				o.worldVertex = worldVertex;
@@ -74,7 +75,8 @@ Shader "Unlit/TerrainShader"
 				float3 V = normalize(_WorldSpaceCameraPos - v.worldVertex.xyz);
 
 
-				float3 H = normalize(V + L);
+				//float3 H = normalize(V + L);
+				float3 H = float3(0,0,0);
 				float3 spe = fAtt * _PointLightColor.rgb * Ks * pow(saturate(dot(interpNormal, H)), specN);
 
 				float4 returnColor = float4(0.0f, 0.0f, 0.0f, 0.0f);

@@ -14,6 +14,6 @@ public class SphereOrbit : MonoBehaviour {
         counter += Time.deltaTime * OrbitSpeed;
         float x = Mathf.Cos(counter) * coordinateX;
         float y = Mathf.Sin(counter) * coordinateY;
-        this.transform.localPosition = new Vector3(x, y, 0.0f);
+        this.transform.position = new Vector3(x, y, 0.0f);
     }
 }

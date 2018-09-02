@@ -34,8 +34,13 @@ public class TerrainGenerator : MonoBehaviour
     {
         MeshRenderer renderer = this.gameObject.GetComponent<MeshRenderer>();
 
-        renderer.material.SetColor("PointLightColor", this.pointLight.color);
-        renderer.material.SetVector("PointLightPosition", this.pointLight.GetWorldPosition());
+        renderer.material.SetColor("_PointLightColor", this.pointLight.color);
+        renderer.material.SetVector("_PointLightPosition", this.pointLight.GetWorldPosition());
+
+        MeshRenderer waterRenderer = this.transform.Find("Water").gameObject.GetComponent<MeshRenderer>();
+        waterRenderer.material.SetColor("_PointLightColor", this.pointLight.color);
+        waterRenderer.material.SetVector("_PointLightPosition", this.pointLight.GetWorldPosition());
+
 
     }
 

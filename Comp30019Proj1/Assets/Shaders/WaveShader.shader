@@ -50,7 +50,8 @@ Shader "Unlit/WaveShader"
 				float3 worldNormal = normalize(mul(transpose((float3x3)unity_WorldToObject), v.normal.xyz));
 
 
-				o.vertex = UnityObjectToClipPos(v.vertex);
+				//o.vertex = UnityObjectToClipPos(v.vertex);
+				o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
 				o.color = float4(0.0f, 0.4f, 1.0f, 0.8f);
 
 				o.worldVertex = worldVertex;

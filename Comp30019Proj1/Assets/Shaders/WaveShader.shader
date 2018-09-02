@@ -51,7 +51,7 @@ Shader "Unlit/WaveShader"
 
 
 				o.vertex = UnityObjectToClipPos(v.vertex);
-				o.color = v.color;
+				o.color = float4(0.0f, 0.4f, 1.0f, 0.8f);
 
 				o.worldVertex = worldVertex;
 				o.worldNormal = worldNormal;
@@ -81,7 +81,7 @@ Shader "Unlit/WaveShader"
 
 				float3 H = normalize(V + L);
 				float3 spe = fAtt * _PointLightColor.rgb * Ks * pow(saturate(dot(interpNormal, H)), specN);
-				float4 returnColor = float4(0.0f, 0.4f, 1.0f, 0.8f);
+				float4 returnColor;
 				returnColor.rgb = amb.rgb + dif.rgb + spe.rgb;
 				returnColor.a = v.color.a;
 

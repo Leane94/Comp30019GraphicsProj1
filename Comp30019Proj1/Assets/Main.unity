@@ -510,8 +510,8 @@ GameObject:
   - component: {fileID: 1235981305}
   - component: {fileID: 1235981304}
   - component: {fileID: 1235981303}
-  - component: {fileID: 1235981302}
   - component: {fileID: 1235981307}
+  - component: {fileID: 1235981302}
   m_Layer: 0
   m_Name: Cube
   m_TagString: Untagged
@@ -527,10 +527,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 1235981301}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: adee5c732c9734889aeb7c1e733c782c, type: 3}
+  m_Script: {fileID: 11500000, guid: 30e41f6fb61c448e0aaf722ec5f38ee5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 1
+  speed: 5
 --- !u!65 &1235981303
 BoxCollider:
   m_ObjectHideFlags: 0

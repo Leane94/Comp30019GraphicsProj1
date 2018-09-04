@@ -20,7 +20,7 @@ public class CameraControl : MonoBehaviour
         Vector3 initialPosition = new Vector3(-xMax, yMax*2, -zMax);
 
         this.transform.position = initialPosition;
-        this.transform.eulerAngles += new Vector3(25.0f, 60.0f, 0.0f);
+        this.transform.eulerAngles += new Vector3(30.0f, 45.0f, 0.0f);
 
     }
 

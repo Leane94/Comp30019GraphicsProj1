@@ -1,5 +1,5 @@
 ﻿//UNITY_SHADER_NO_UPGRADE
-
+//Phong model created by Mayank
 Shader "Unlit/TerrainShader"
 {
 	Properties

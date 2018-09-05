@@ -1,9 +1,14 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+/// <summary>
+/// Terrain generator which uses diamond-square algorithm to generate random terrain,
+/// and color terrain based on height
+/// </summary>
+// Created by Chao Li
 public class TerrainGenerator : MonoBehaviour
 {
+    //Light source for the world
     public PointLight pointLight;
 
     // Number of divisions per line (e.g. 5 vertices/line => 4*4 divisions)
@@ -32,8 +37,8 @@ public class TerrainGenerator : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        // Update light position for each shader
         MeshRenderer renderer = this.gameObject.GetComponent<MeshRenderer>();
-
         renderer.material.SetColor("_PointLightColor", this.pointLight.color);
         renderer.material.SetVector("_PointLightPosition", this.pointLight.GetWorldPosition());
 
@@ -41,14 +46,14 @@ public class TerrainGenerator : MonoBehaviour
         waterRenderer.material.SetColor("_PointLightColor", this.pointLight.color);
         waterRenderer.material.SetVector("_PointLightPosition", this.pointLight.GetWorldPosition());
 
-
     }
 
-    // Create a flat mesh 
+    /// <summary>
+    /// Create a flat mesh
+    /// </summary>  
     public Mesh CreateMesh()
     {
         // Initialisation    
-
         // Array of all vertices
         Vector3[] vertices = new Vector3[numVertices];
         // Array of UV vectors
@@ -102,6 +107,9 @@ public class TerrainGenerator : MonoBehaviour
         return flatMesh;
     }
 
+    /// <summary>
+    /// Create water mesh
+    /// </summary>
     private void CreateWater()
     {
         Mesh waterMesh = CreateMesh();
@@ -110,14 +118,13 @@ public class TerrainGenerator : MonoBehaviour
 
         waterMesh.RecalculateBounds();
         waterMesh.RecalculateNormals();
-        Debug.Log("Water created");
-
-       
     }
 
+    /// <summary>
+    /// Create terrain mesh
+    /// </summary>
     private void CreateTerrain()
     {        
-
         // Create a new mesh for terrain
         Mesh terrainMesh = CreateMesh();
         GetComponent<MeshFilter>().mesh = terrainMesh;
@@ -127,7 +134,10 @@ public class TerrainGenerator : MonoBehaviour
         GetComponent<MeshCollider>().sharedMesh = terrainMesh;
     }
 
-    // Diamond-Square algorithms
+    /// <summary>
+    /// Apply diamond-square algorithm to a mesh
+    /// </summary>
+    /// <param name="terrainMesh">Mesh to be manipulate</param>
     private void DiamondSquare(Mesh terrainMesh)
     {
         // Initialize corner of the terrain
@@ -168,7 +178,14 @@ public class TerrainGenerator : MonoBehaviour
         terrainMesh.RecalculateNormals();
     }
 
-    // Diamond Square calculation
+    /// <summary>
+    /// Calculate position for each vertices
+    /// </summary>
+    /// <param name="row">row number of squares</param>
+    /// <param name="col">colum number of squares</param>
+    /// <param name="size">size of square</param>
+    /// <param name="offset">offset for random number to be add</param>
+    /// <param name="vertices">array of all vertices</param>
     private void DSCalculator(int row, int col, int size, float offset, Vector3[] vertices)
     {
         int halfSize = (int)(0.5f * size);
@@ -237,7 +254,9 @@ public class TerrainGenerator : MonoBehaviour
         }
     }
 
-    // Set colour of terrain based on height of vertex
+    /// <summary>
+    /// Set colour of terrain based on height of vertex
+    /// </summary>
     private void ColourTerrain()
     {
         Mesh terrainMesh = GetComponent<MeshFilter>().mesh;
@@ -252,6 +271,10 @@ public class TerrainGenerator : MonoBehaviour
             else if (vertices[i].y > maxHeight * 0.9f)
             {
                 colourArray[i] = Color.white;
+            }
+            else if (vertices[i].y <= maxHeight * 0.9f && vertices[i].y >= maxHeight * 0.8f)
+            {
+                colourArray[i] = new Color(0.68f, 0.51f, 0.06f, 1);
             }
             else
             {

@@ -1,5 +1,6 @@
 ﻿//UNITY_SHADER_NO_UPGRADE
-
+// wave movement created by Chao
+// Phong model created by Mayank
 Shader "Unlit/WaveShader"
 {
 	Properties
@@ -42,7 +43,7 @@ Shader "Unlit/WaveShader"
 			vertOut vert(vertIn v)
 			{
 			    // increase frequency, decrease amplitude, increase move speed
-				v.vertex.y += sin(v.vertex.x * 5.0f + _Time.y * 2.0f) * 0.05f;
+				v.vertex.y += sin(v.vertex.x * 5.0f + _Time.y * 2.0f) * 0.07f;
 
 				vertOut o;
 

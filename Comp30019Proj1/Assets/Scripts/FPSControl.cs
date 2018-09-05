@@ -8,7 +8,7 @@ using UnityEngine.UI;
 // Created by Chao
 public class FPSControl : MonoBehaviour {
 
-    private int targetFPS = 30;
+    private int targetFPS = 60;
     private float deltaTime = 0.0f;
 
     public void Awake()
@@ -20,7 +20,6 @@ public class FPSControl : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
         deltaTime += (Time.unscaledDeltaTime - deltaTime) * 0.1f;
-        float msec = deltaTime * 1000.0f;
         float currFPS = 1.0f / deltaTime;
         string text = string.Format("{0:0.} fps", currFPS);
         this.GetComponent<Text>().text = text;

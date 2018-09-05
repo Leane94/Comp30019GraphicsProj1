@@ -38,7 +38,8 @@ public class CameraControl : MonoBehaviour
         float amountToMove = Time.deltaTime * speed;
         Vector3 futurePosition ;
                                  
-   
+            // Calculate future position and checks whether it goes beyond the terrain size
+            // then proceeds if it's within the bounds
             if (Input.GetKey(KeyCode.W))
             {
                 futurePosition = this.transform.position + this.transform.forward * amountToMove;
@@ -76,10 +77,11 @@ public class CameraControl : MonoBehaviour
                 }
             }
                 
-
+        // Calculates movement of mouse in the x-axis
         yaw += speed * Input.GetAxis("Mouse X");
+        // Calculates movement of mouse in the y-axis
         pitch -= speed * Input.GetAxis("Mouse Y");
-
+        // Applies the change in yaw and pitch to the angle of the camera
         this.transform.eulerAngles += new Vector3(pitch, yaw, 0.0f);
 
        

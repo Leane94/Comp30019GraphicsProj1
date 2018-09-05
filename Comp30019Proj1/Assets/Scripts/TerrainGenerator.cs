@@ -138,6 +138,7 @@ public class TerrainGenerator : MonoBehaviour
     /// Apply diamond-square algorithm to a mesh
     /// </summary>
     /// <param name="terrainMesh">Mesh to be manipulate</param>
+    /// Learned implementation from https://www.youtube.com/watch?v=1HV8GbFnCik, make some improvements and some bugfix.
     private void DiamondSquare(Mesh terrainMesh)
     {
         // Initialize corner of the terrain

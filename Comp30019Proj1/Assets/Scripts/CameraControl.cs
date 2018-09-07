@@ -35,7 +35,7 @@ public class CameraControl : MonoBehaviour
     }
 
 
-    void Update(){
+    void FixedUpdate(){
 
         float yaw = 0.0f;
         float pitch = 0.0f;

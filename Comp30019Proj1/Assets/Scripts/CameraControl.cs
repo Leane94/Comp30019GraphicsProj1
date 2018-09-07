@@ -3,7 +3,11 @@ using System.Collections;
 /// <summary>
 /// Camera control and collision detection
 /// </summary>
-// Created by Judd
+// Created by Judd Guerrero
+
+// Concepts of yaw and pitch taken from
+//https://gamedev.stackexchange.com/questions/104693/how-to-use-input-getaxismouse-x-y-to-rotate-the-camera
+
 public class CameraControl : MonoBehaviour
 {
     // Speed of the camera movement
